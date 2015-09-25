@@ -6,10 +6,12 @@ class ImmutableDict(object):
     arguments as builtin dict'''
 
     def __init__(self, initdict=None, **kwargs):
+        import pdb; pdb.set_trace()
         if initdict is None: initdict = {}
+        # Q: Doesn't this trash the caller?
         initdict.update(kwargs)
         hashlist = [(hash(key), (key, initdict[key])) for key in initdict]
-        self.tree = LookupTree(dict(hashlist))
+        self.tree = LookupTree(hashlist)
         self._length = len(initdict)
 
     def assoc(self, key, value):

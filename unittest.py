@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import uuid
+
 import funktown
 
 from funktown.lookuptree import LookupTree
@@ -51,6 +53,22 @@ def dicttest():
     assert ImmutableDict() == {}
     assert ImmutableDict().get(1, 2) == 2
 
+def dict_creation_test():
+    d1 = {"a": 1, "b": 2, "c": 3}
+    d2 = d1.copy()
+    initial_length = len(d1)
+    i_d = ImmutableDict(d1, d=4)
+    assert len(d1) == initial_length
+    assert len(i_d) == initial_length + 1
+
+def dict_collision_test():
+    l = [uuid.uuid4() for _ in range(10000)]
+    d = {str(uid):uid for uid in l}
+    i_d = ImmutableDict(d)
+    assert len(i_d.keys()) == len(d.keys())
+    for k in l:
+        assert i_d[str(k)]
+
 def listtest():
     l1 = ImmutableList([2, 3])
     assert l1.conj(1) == [1, 2, 3]
@@ -77,6 +95,8 @@ if __name__ == "__main__":
     treetest()
     vectortest()
     dicttest()
+    dict_creation_test()
+    dict_collision_test()
     listtest()
     typetest()
     print("All tests passed")
