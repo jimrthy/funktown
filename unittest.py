@@ -54,8 +54,7 @@ def dicttest():
     assert ImmutableDict().get(1, 2) == 2
 
 def dict_creation_test():
-    d1 = {"a": 1, "b": 2, "c": 3}
-    d2 = d1.copy()
+    d1 = {"a": 1, "b": 2, "c": 3, 4: 'd'}
     initial_length = len(d1)
     i_d = ImmutableDict(d1, d=4)
     assert len(d1) == initial_length
@@ -64,6 +63,7 @@ def dict_creation_test():
 def dict_collision_test():
     l = [uuid.uuid4() for _ in range(10000)]
     d = {str(uid):uid for uid in l}
+    #import pdb; pdb.set_trace()
     i_d = ImmutableDict(d)
     assert len(i_d.keys()) == len(d.keys())
     for k in l:

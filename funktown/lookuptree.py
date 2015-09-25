@@ -87,6 +87,7 @@ class LookupTree(object):
             level += 1
             child = node.children[ind]
             if child is None or child.index == newnode.index:
+                assert ind not in node.children, "Hash (?) collision"
                 node.children[ind] = newnode
                 break
             elif child.index == -1:
@@ -95,6 +96,7 @@ class LookupTree(object):
                 branch = LookupTreeNode()
                 nind = _getbits(newnode.index, level)
                 cind = _getbits(child.index, level)
+                assert ind not in node.children
                 node.children[ind] = branch
                 branch.children[nind] = newnode
                 branch.children[cind] = child
