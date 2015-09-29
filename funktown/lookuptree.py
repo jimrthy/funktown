@@ -111,7 +111,7 @@ class LookupTree(object):
                 node.children[ind] = newnode
                 break
             elif child.index == _root_index:
-                # This is the root
+                # This is a branch
                 node = child
             else:
                 branch = LookupTreeNode()
@@ -119,46 +119,10 @@ class LookupTree(object):
                 cind = _getbits(child.index, level)
                 node.children[ind] = branch
 
-                # At least part of the problem is a collision when nind == cind
+                # Life gets tricky when...
                 if nind == cind:
-                    msg = ('Warning\n2nd level key collision at level {}:\n'
-                           'initial index: {}\n'
-                           'newnode index == {}\n'
-                           'existing childnode: {}, index == {}\n'
-                           'newnode index beneath branch: {}\n'
-                           'child node index beneath branch: {}\n'
-                           'Trying to insert {}\n'
-                           'into:\n{}')
-                    children = ''
-                    n = 0
-                    for kid in node.children:
-                        if kid is not None:
-                            children += '\n\t{}: {}'.format(n, kid)
-                            n += 1
-                    formatted = msg.format(level-1,  # already incremented
-                                           ind,
-                                           newnode.index,
-                                           child.value,
-                                           child.index,
-                                           nind,
-                                           cind,
-                                           value,
-                                           children)
-                    print formatted
-                    '''
-                    raise NotImplementedError('FIXME: Start here')
-                    assert False, formatted
-                    '''
-                    #import pdb; pdb.set_trace()
-                    # We started out calculating the key for the next level
-                    #cind2 = _getbits(child.index, level+1)
-                    # branch is fresh: everything should be None here.
-                    if branch.children[cind] is not None:
-                        # This isn't my problem
-                        raise NotImplementedError('Yet another collision')
-                    else:
-                        branch.children[cind] = child
-                    # Go ahead and recurse
+                    branch.children[cind] = child
+                    # recurse
                     node = branch
                 else:
                     branch.children[nind] = newnode

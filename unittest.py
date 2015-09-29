@@ -143,7 +143,7 @@ def typetest():
     v = ImmutableVector()
     d = ImmutableDict()
 
-    assert l != None
+    assert l is not None
     assert v != 3
     assert d != 'a'
 
