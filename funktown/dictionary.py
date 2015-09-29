@@ -1,4 +1,7 @@
+import collections
+
 from .lookuptree import LookupTree
+
 
 class ImmutableDict(object):
     '''An immutable dictionary class. Access, insertion, and removal
@@ -87,7 +90,7 @@ class ImmutableDict(object):
         if other is None:
             return False
 
-        if not hasattr(other, '__getitem__'):
+        if not isinstance(other, collections.Mapping):
             return False
 
         if len(self) != len(other):
