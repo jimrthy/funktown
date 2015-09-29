@@ -152,7 +152,6 @@ def typetest():
     assert d != l
 
 if __name__ == "__main__":
-    # This still fails horribly
     dict_collision_test()
     simpler_dict_collision_test()
     # This is simply too slow to run regularly/often
