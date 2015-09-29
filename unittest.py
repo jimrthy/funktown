@@ -86,6 +86,8 @@ def ugly_tree_creation_test():
     assert not error_values
 
 def brutal_creation_test():
+    """ Note that this is incredibly slow and painful.
+    You probably won't want to run it often """
     errors = []
     for i in range(10000):
         print '@',
@@ -112,14 +114,14 @@ def simpler_dict_collision_test():
         assert False, str(failures)
 
 def dict_collision_test():
-    l = [uuid.uuid4() for _ in range(10000)]
-    d = {str(uid):uid for uid in l}
+    l = [str(uuid.uuid4()) for _ in range(10000)]
+    d = {l[n]: n for n in range(10000)}
     i_d = ImmutableDict(d)
     assert len(i_d.keys()) == len(d.keys())
     failures = []
     for k in l:
         if str(k) not in i_d:
-            failures.append(k)
+            failures.append({k: d[k]})
     if failures:
         msg = 'UUID entries lost:'
         for uid in failures:
@@ -150,14 +152,16 @@ def typetest():
     assert d != l
 
 if __name__ == "__main__":
-    #brutal_creation_test()
-    dict_int_test()
-    #ugly_tree_creation_test()
-    dict_creation_test()
-    # This passes now
-    simpler_dict_collision_test()
     # This still fails horribly
     dict_collision_test()
+    simpler_dict_collision_test()
+    # This is simply too slow to run regularly/often
+    # (if at all)
+    # brutal_creation_test()
+    dict_int_test()
+    # TODO: Get this passing
+    # ugly_tree_creation_test()
+    dict_creation_test()
     treetest()
     vectortest()
     dicttest()

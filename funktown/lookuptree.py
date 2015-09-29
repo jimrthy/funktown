@@ -1,5 +1,10 @@
 import uuid
 
+# This isn't named well. It's really a flag that
+# tells us we're talking about a branch node rather
+# than a leaf.
+# Q: Is this really more efficient than just setting
+# a boolean?
 _root_index = uuid.uuid4()
 
 
@@ -27,7 +32,12 @@ class LookupTreeNode(object):
 class LookupTree(object):
     '''A lookup tree with a branching factor of 32. The constructor
     takes an argument initvalues, which can either be a list of values
-    or a dictionary mapping indices to values.'''
+    or a dictionary mapping indices to values.
+
+    This really needs to construct a balanced tree (the canonical example
+    is red-black).
+    Q: Is it doing so?
+    '''
     def __init__(self, initvalues=None):
         self.root = LookupTreeNode()
         if initvalues is None:
@@ -107,11 +117,14 @@ class LookupTree(object):
                 branch = LookupTreeNode()
                 nind = _getbits(newnode.index, level)
                 cind = _getbits(child.index, level)
+                node.children[ind] = branch
+
+                # At least part of the problem is a collision when nind == cind
                 if nind == cind:
-                    msg = ('Warning\n2nd level key collision:\n'
+                    msg = ('Warning\n2nd level key collision at level {}:\n'
                            'initial index: {}\n'
                            'newnode index == {}\n'
-                           'existing childnode index == {}\n'
+                           'existing childnode: {}, index == {}\n'
                            'newnode index beneath branch: {}\n'
                            'child node index beneath branch: {}\n'
                            'Trying to insert {}\n'
@@ -119,35 +132,33 @@ class LookupTree(object):
                     children = ''
                     n = 0
                     for kid in node.children:
-                        children += '\n\t{}: {}'.format(n, kid)
-                        n += 1
-                    formatted = msg.format(ind,
+                        if kid is not None:
+                            children += '\n\t{}: {}'.format(n, kid)
+                            n += 1
+                    formatted = msg.format(level-1,  # already incremented
+                                           ind,
                                            newnode.index,
+                                           child.value,
                                            child.index,
                                            nind,
                                            cind,
                                            value,
                                            children)
-                    # The child which was there originally is disappearing.
-                    # At least with this particular implementation.
                     print formatted
                     '''
                     raise NotImplementedError('FIXME: Start here')
                     assert False, formatted
                     '''
-                node.children[ind] = branch
-                # At least part of the problem is a collision when nind == cind
-                if nind == cind:
-                    cind2 = _getbits(child.index, level+1)
-                    if cind2 not in branch.children:
-                        branch.children[cind2] = child
-                    else:
+                    #import pdb; pdb.set_trace()
+                    # We started out calculating the key for the next level
+                    #cind2 = _getbits(child.index, level+1)
+                    # branch is fresh: everything should be None here.
+                    if branch.children[cind] is not None:
                         # This isn't my problem
                         raise NotImplementedError('Yet another collision')
+                    else:
+                        branch.children[cind] = child
                     # Go ahead and recurse
-                    # The problem with this approach is that I'm just arbitrarily
-                    # throwing away the existing child node.
-                    # really need to insert them both
                     node = branch
                 else:
                     branch.children[nind] = newnode
