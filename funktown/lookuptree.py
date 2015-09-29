@@ -19,6 +19,10 @@ class LookupTreeNode(object):
                         yield value
                 else: yield child.value
 
+    def __repr__(self):
+        result = '{}: {}'.format(self.index, self.value)
+        return result
+
 
 class LookupTree(object):
     '''A lookup tree with a branching factor of 32. The constructor
@@ -92,7 +96,8 @@ class LookupTree(object):
             level += 1
             child = node.children[ind]
             if child is None or child.index == newnode.index:
-                assert ind not in node.children, "Hash (?) collision"
+                if child:
+                    assert child.value == newnode.value
                 node.children[ind] = newnode
                 break
             elif child.index == _root_index:
@@ -102,8 +107,30 @@ class LookupTree(object):
                 branch = LookupTreeNode()
                 nind = _getbits(newnode.index, level)
                 cind = _getbits(child.index, level)
-                assert ind not in node.children
+                if nind == cind:
+                    msg = ('2nd level key collision:\n'
+                           'initial index: {}\n'
+                           'newnode index == {}\n'
+                           'existing childnode index == {}\n'
+                           'newnode index beneath branch: {}\n'
+                           'child node index beneath branch: {}\n'
+                           'Trying to insert {}\n'
+                           'into:\n{}')
+                    children = ''
+                    n = 0
+                    for kid in node.children:
+                        children += '\n\t{}: {}'.format(n, kid)
+                        n += 1
+                    raise NotImplementedError('FIXME: Start here')
+                    assert False, msg.format(ind,
+                                             newnode.index,
+                                             child.index,
+                                             nind,
+                                             cind,
+                                             value,
+                                             children)
                 node.children[ind] = branch
+                # At least part of the problem is a collision when nind == cind
                 branch.children[nind] = newnode
                 branch.children[cind] = child
                 break

@@ -24,6 +24,7 @@ class ImmutableDict(object):
         initdict.update(kwargs)
         hashlist = [(hash2(key), (key, initdict[key])) for key in initdict]
         fixed_up = dict(hashlist)
+        #import pdb; pdb.set_trace()
         self.tree = LookupTree(fixed_up)
         self._length = len(initdict)
 

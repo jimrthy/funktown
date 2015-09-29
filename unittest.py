@@ -66,11 +66,10 @@ def dict_int_test():
     assert (len(d1.keys()) == 16)
 
 def ugly_tree_creation_test():
-    import pdb; pdb.set_trace()
     tree = LookupTree()
     error_values = []
     for i in range(10000):
-        tree.insert(hash(i), i)
+        tree.insert(hash(i), (i, i))
         n = 0
         try:
             for k, v in tree:
@@ -78,9 +77,24 @@ def ugly_tree_creation_test():
             if n != i+1:
                 error_values.append(i)
         except TypeError:
+            # this is failing the first time through the loop, because
+            # integers aren't iterable.
+            # I'm torn about what to think about this fact.
+            # Probably just means I don't understand the tree as well as I thought
             print "Quit being able to iterate over tree on insert # %d" % i
             raise
     assert not error_values
+
+def brutal_creation_test():
+    errors = []
+    for i in range(10000):
+        d = {n:n for n in range(i)}
+        i_d = ImmutableDict(d)
+        for j in range(i):
+            if j not in i_d:
+                msg = '@ length {}, index {} got lost'
+                errors.append(msg.format(i, j))
+    assert not errors, str(errors)
 
 def simpler_dict_collision_test():
     d = {n:n for n in range(10000)}
@@ -125,6 +139,7 @@ def typetest():
     assert d != l
 
 if __name__ == "__main__":
+    brutal_creation_test()
     dict_int_test()
     #ugly_tree_creation_test()
     dict_creation_test()
