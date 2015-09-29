@@ -2,25 +2,43 @@ import collections
 
 from .lookuptree import LookupTree
 
-import collections
 
 class ImmutableDict(collections.Mapping):
+import hashlib
+
+from .lookuptree import LookupTree
+
+
+def hash2(x):
+    # Can't just use the hash object directly:
+    # LookupTree relies on this being numeric
+    h = hashlib.sha512(str(x))
+    return long(h.hexdigest(), 16)
+
+
+class ImmutableDict(object):
     '''An immutable dictionary class. Access, insertion, and removal
     are guaranteed to have O(log(n)) performance. Constructor takes same
     arguments as builtin dict'''
 
     def __init__(self, initdict=None, **kwargs):
-        if initdict is None: initdict = {}
+        if initdict is None:
+            initdict = {}
+        else:
+            # Don't want to overwrite what the caller sent
+            initdict = initdict.copy()
         initdict.update(kwargs)
-        hashlist = [(hash(key), (key, initdict[key])) for key in initdict]
-        self.tree = LookupTree(dict(hashlist))
+        hashlist = [(hash2(key), (key, initdict[key])) for key in initdict]
+        fixed_up = dict(hashlist)
+        #import pdb; pdb.set_trace()
+        self.tree = LookupTree(fixed_up)
         self._length = len(initdict)
 
     def assoc(self, key, value):
         '''Returns a new ImmutableDict instance with value associated with key.
         The implicit parameter is not modified.'''
         copydict = ImmutableDict()
-        copydict.tree = self.tree.assoc(hash(key), (key, value))
+        copydict.tree = self.tree.assoc(hash2(key), (key, value))
         copydict._length = self._length + 1
         return copydict
 
@@ -30,10 +48,10 @@ class ImmutableDict(collections.Mapping):
         modifying in-place.'''
         copydict = ImmutableDict()
         if other:
-            vallist = [(hash(key), (key, other[key])) for key in other]
+            vallist = [(hash2(key), (key, other[key])) for key in other]
         else: vallist = []
         if kwargs:
-            vallist += [(hash(key), (key, kwargs[key])) for key in kwargs]
+            vallist += [(hash2(key), (key, kwargs[key])) for key in kwargs]
         copydict.tree = self.tree.multi_assoc(vallist)
         copydict._length = iter_length(copydict.tree)
         return copydict
@@ -41,7 +59,7 @@ class ImmutableDict(collections.Mapping):
     def remove(self, key):
         '''Returns a new ImmutableDict with the given key removed.'''
         copydict = ImmutableDict()
-        copydict.tree = self.tree.remove(hash(key))
+        copydict.tree = self.tree.remove(hash2(key))
         copydict._length = self._length - 1
         return copydict
 
@@ -56,7 +74,7 @@ class ImmutableDict(collections.Mapping):
 
     def __getitem__(self, key):
         try:
-            return self.tree[hash(key)][1]
+            return self.tree[hash2(key)][1]
         except KeyError: raise KeyError(key)
 
     def __iter__(self):
@@ -83,7 +101,7 @@ class ImmutableDict(collections.Mapping):
 
     def __contains__(self, key):
         try:
-            self.tree[hash(key)]
+            self.tree[hash2(key)]
             return True
         except KeyError: return False
 
