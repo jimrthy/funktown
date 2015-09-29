@@ -88,12 +88,15 @@ def ugly_tree_creation_test():
 def brutal_creation_test():
     errors = []
     for i in range(10000):
+        print '@',
         d = {n:n for n in range(i)}
         i_d = ImmutableDict(d)
         for j in range(i):
             if j not in i_d:
                 msg = '@ length {}, index {} got lost'
                 errors.append(msg.format(i, j))
+        if not i % 80:
+            print '!'
     assert not errors, str(errors)
 
 def simpler_dict_collision_test():
@@ -139,7 +142,7 @@ def typetest():
     assert d != l
 
 if __name__ == "__main__":
-    brutal_creation_test()
+    #brutal_creation_test()
     dict_int_test()
     #ugly_tree_creation_test()
     dict_creation_test()

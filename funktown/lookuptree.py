@@ -121,6 +121,7 @@ class LookupTree(object):
                     for kid in node.children:
                         children += '\n\t{}: {}'.format(n, kid)
                         n += 1
+                    """
                     raise NotImplementedError('FIXME: Start here')
                     assert False, msg.format(ind,
                                              newnode.index,
@@ -129,11 +130,16 @@ class LookupTree(object):
                                              cind,
                                              value,
                                              children)
+                    """
                 node.children[ind] = branch
                 # At least part of the problem is a collision when nind == cind
-                branch.children[nind] = newnode
-                branch.children[cind] = child
-                break
+                if nind == cind:
+                    # Go ahead and recurse
+                    node = branch
+                else:
+                    branch.children[nind] = newnode
+                    branch.children[cind] = child
+                    break
 
     def __iter__(self):
         return iter(self.root)
