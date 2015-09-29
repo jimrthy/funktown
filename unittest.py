@@ -60,10 +60,43 @@ def dict_creation_test():
     assert len(d1) == initial_length
     assert len(i_d) == initial_length + 1
 
+def dict_int_test():
+    d = {n:n for n in range(16)}
+    d1 = ImmutableDict(d)
+    assert (len(d1.keys()) == 16)
+
+def ugly_tree_creation_test():
+    import pdb; pdb.set_trace()
+    tree = LookupTree()
+    error_values = []
+    for i in range(10000):
+        tree.insert(hash(i), i)
+        n = 0
+        try:
+            for k, v in tree:
+                n += 1
+            if n != i+1:
+                error_values.append(i)
+        except TypeError:
+            print "Quit being able to iterate over tree on insert # %d" % i
+            raise
+    assert not error_values
+
+def simpler_dict_collision_test():
+    d = {n:n for n in range(10000)}
+    i_d = ImmutableDict(d)
+    failures = []
+    result_keys = i_d.keys()
+    for n in range(10000):
+        if n not in result_keys:
+            failures.append(n)
+    if failures:
+        print "Lost %d keys: %s" % (len(failures), failures)
+        assert False, str(failures)
+
 def dict_collision_test():
     l = [uuid.uuid4() for _ in range(10000)]
     d = {str(uid):uid for uid in l}
-    #import pdb; pdb.set_trace()
     i_d = ImmutableDict(d)
     assert len(i_d.keys()) == len(d.keys())
     for k in l:
@@ -92,11 +125,14 @@ def typetest():
     assert d != l
 
 if __name__ == "__main__":
+    dict_int_test()
+    #ugly_tree_creation_test()
+    dict_creation_test()
+    simpler_dict_collision_test()
+    dict_collision_test()
     treetest()
     vectortest()
     dicttest()
-    dict_creation_test()
-    dict_collision_test()
     listtest()
     typetest()
     print("All tests passed")
