@@ -108,7 +108,7 @@ class LookupTree(object):
                 nind = _getbits(newnode.index, level)
                 cind = _getbits(child.index, level)
                 if nind == cind:
-                    msg = ('2nd level key collision:\n'
+                    msg = ('Warning\n2nd level key collision:\n'
                            'initial index: {}\n'
                            'newnode index == {}\n'
                            'existing childnode index == {}\n'
@@ -121,20 +121,33 @@ class LookupTree(object):
                     for kid in node.children:
                         children += '\n\t{}: {}'.format(n, kid)
                         n += 1
-                    """
+                    formatted = msg.format(ind,
+                                           newnode.index,
+                                           child.index,
+                                           nind,
+                                           cind,
+                                           value,
+                                           children)
+                    # The child which was there originally is disappearing.
+                    # At least with this particular implementation.
+                    print formatted
+                    '''
                     raise NotImplementedError('FIXME: Start here')
-                    assert False, msg.format(ind,
-                                             newnode.index,
-                                             child.index,
-                                             nind,
-                                             cind,
-                                             value,
-                                             children)
-                    """
+                    assert False, formatted
+                    '''
                 node.children[ind] = branch
                 # At least part of the problem is a collision when nind == cind
                 if nind == cind:
+                    cind2 = _getbits(child.index, level+1)
+                    if cind2 not in branch.children:
+                        branch.children[cind2] = child
+                    else:
+                        # This isn't my problem
+                        raise NotImplementedError('Yet another collision')
                     # Go ahead and recurse
+                    # The problem with this approach is that I'm just arbitrarily
+                    # throwing away the existing child node.
+                    # really need to insert them both
                     node = branch
                 else:
                     branch.children[nind] = newnode

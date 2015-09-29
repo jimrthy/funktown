@@ -116,8 +116,16 @@ def dict_collision_test():
     d = {str(uid):uid for uid in l}
     i_d = ImmutableDict(d)
     assert len(i_d.keys()) == len(d.keys())
+    failures = []
     for k in l:
-        assert i_d[str(k)]
+        if str(k) not in i_d:
+            failures.append(k)
+    if failures:
+        msg = 'UUID entries lost:'
+        for uid in failures:
+            msg += '{}\n'.format(uid)
+        msg += '\n(There are {} of them)'.format(len(failures))
+        assert False, msg
 
 def listtest():
     l1 = ImmutableList([2, 3])
@@ -146,7 +154,9 @@ if __name__ == "__main__":
     dict_int_test()
     #ugly_tree_creation_test()
     dict_creation_test()
+    # This passes now
     simpler_dict_collision_test()
+    # This still fails horribly
     dict_collision_test()
     treetest()
     vectortest()
